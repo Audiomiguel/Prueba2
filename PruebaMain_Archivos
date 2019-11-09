@@ -1,0 +1,32 @@
+#include "Files.h"
+#include <msclr\marshal_cppstd.h>
+
+using namespace System;
+using namespace System::IO;
+using namespace System::Text;
+string ConvertirString(String^ ss)
+{
+	return string(msclr::interop::marshal_as<std::string>(ss));
+}
+int main()
+{
+	DirectoryInfo^ d = gcnew DirectoryInfo("e:\\Algoritmos y Estructura de Datos");
+	//array<DirectoryInfo> arreglo =  d->GetFiles(".txt");
+	String^ path = "e:\\Algoritmos y Estructura de Datos\\trabajoalgoritmos.txt";
+	FileInfo^ archivo = gcnew FileInfo(path);
+
+	/*Archivo* Texto0 = new Archivo(ConvertirString(archivo->Name),
+		archivo->Length, ConvertirString(archivo->Extension),
+		ConvertirString(Convert::ToString(archivo->CreationTime)), 
+		ConvertirString(archivo->DirectoryName));
+	
+	//cout <<Texto0->getDireccion()<<endl;
+		Console::WriteLine(archivo->Name);
+		Console::WriteLine(archivo->DirectoryName); //direccion
+		Console::WriteLine(archivo->Extension);
+		Console::WriteLine(Convert::ToString(archivo->CreationTime));
+		Console::WriteLine(archivo->Length);
+		*/
+		system("pause");
+		
+}
