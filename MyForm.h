@@ -1,6 +1,8 @@
 #pragma once
 #include <msclr\marshal_cppstd.h>
 #include "Files.h"
+#include <fstream>
+
 using namespace System::Threading;
 using namespace System::Collections::Generic;
 using namespace std;
@@ -528,34 +530,56 @@ private: System::Void MyForm_Load(System::Object^  sender, System::EventArgs^  e
 private: System::Void VerArchivos_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
 }
 private: System::Void buscar_btn_Click(System::Object^  sender, System::EventArgs^  e) 
-{
-	if (folderBrowserDialog1->ShowDialog() == System::Windows::Forms::DialogResult::OK)
+private: System::Void buscar_btn_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-		VerArchivos->Items->Clear();
-		cli::array<String^>^  files = Directory::GetFiles(folderBrowserDialog1->SelectedPath);
+		ofstream EscribirRuta;
+		string LineaLectora;
+		EscribirRuta.open("RutaMadre.txt", ios::app);
+		if (EscribirRuta.is_open())
+		{
+			ifstream leerRuta;
+			string texto;
+			leerRuta.open("RutaMadre.txt", ios::in);
+			while (!leerRuta.eof())
+			{
+				getline(leerRuta, texto);
+				cout << texto << endl;
+			}
+			if (texto != "")
+			{
+				String^ str2 = gcnew String(texto.c_str());
+				VerArchivos->Items->Clear();
+				cli::array<String^>^  files = Directory::GetFiles(str2);
 
-		for each(String^ file in files)
-		{
-			VerArchivos->Items->Add(file);
-			FileInfo^ archivo = gcnew FileInfo(path);
-			size++;
-			ArregloArchivo[size-1] = new Archivo(ConvertirString(archivo->Name),
-				archivo->Length, ConvertirString(archivo->Extension),
-				ConvertirString(Convert::ToString(archivo->CreationTime)),
-				ConvertirString(archivo->DirectoryName));
-		}
+				for each(String^ file in files)
+				{
+					VerArchivos->Items->Add(file);
+					FileInfo^ archivo = gcnew FileInfo(file);
+					size++;
+					ArregloArchivo[size - 1] = new HistoriasClinicas(ConvertirString(archivo->Name), archivo->Length, ConvertirString(archivo->Extension),
+						ConvertirString(Convert::ToString(archivo->CreationTime)), ConvertirString(file));
+				}
+			}
+			else
+			{
+				if (folderBrowserDialog1->ShowDialog() == System::Windows::Forms::DialogResult::OK)
+				{
+					EscribirRuta << ConvertirString(folderBrowserDialog1->SelectedPath);  //guarda la ruta por primera vez 
+					VerArchivos->Items->Clear();
+					cli::array<String^>^  files = Directory::GetFiles(folderBrowserDialog1->SelectedPath);
 
-		for (int i = 0; i < size; i++)
-		{
-			ArregloArchivo[i]->getExtension() << endl;
+					for each(String^ file in files)
+					{
+						VerArchivos->Items->Add(file);
+						FileInfo^ archivo = gcnew FileInfo(file);
+						size++;
+						ArregloArchivo[size - 1] = new HistoriasClinicas(ConvertirString(archivo->Name), archivo->Length, ConvertirString(archivo->Extension),
+							ConvertirString(Convert::ToString(archivo->CreationTime)), ConvertirString(file));
+					}
+				}
+			}
 		}
-		/*for each(String^ dir in dirs)
-		{
-			VerArchivos->Items->Add(dir);
-		}*/
 	}
-	
-}
 
 
 private: System::Void folderBrowserDialog1_HelpRequest(System::Object^  sender, System::EventArgs^  e) {
