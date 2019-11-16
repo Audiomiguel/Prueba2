@@ -3,7 +3,7 @@
 #include <iostream>
 using namespace std;
 
-class Archivo
+class HistoriasClinicas
 {
 private:
 	string nombre;
@@ -12,12 +12,12 @@ private:
 	string direccion;
 	string fecha;
 public:
-	Archivo(string nombre, long long tamanio, string extension,
-		string fecha, string direccion) 
+	HistoriasClinicas(string nombre, long long tamanio, string extension,
+		string fecha, string direccion)
 		: nombre(nombre), tamanio(tamanio), extension(extension),
-		direccion(direccion), fecha(fecha){};
-	~Archivo(){}
-	
+		direccion(direccion), fecha(fecha) {};
+	~HistoriasClinicas() {}
+
 	string getNombre() { return nombre; }
 	long long getTamanio() { return tamanio; }
 	string getExtension() { return extension; }
@@ -25,5 +25,3 @@ public:
 	string getFecha() { return fecha; }
 
 };
-
-
