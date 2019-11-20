@@ -1,8 +1,9 @@
 #pragma once
-#include <msclr\marshal_cppstd.h>
-#include <fstream>
 #include "HistoriaClinica.h"
-
+#include "HashTabla.h"
+#include "Arbol.h"
+#include <fstream>
+#include <msclr\marshal_cppstd.h>
 using namespace System::Threading;
 using namespace System::Collections::Generic;
 using namespace std;
@@ -31,6 +32,9 @@ namespace Project1 {
 			//TODO: agregar código de constructor aquí
 			size = 0;
 			ArregloArchivo = new HistoriasClinicas*[size];
+			objArbol = new ArbolB<HistoriasClinicas>();
+			tablaAccesos = new HashTabla(4);
+
 			//
 		}
 
@@ -90,14 +94,6 @@ namespace Project1 {
 
 
 
-
-
-
-
-
-
-
-
 	private: System::Windows::Forms::TextBox^  igual_txt;
 	private: System::Windows::Forms::TextBox^  menor_txt;
 	private: System::Windows::Forms::TextBox^  mayor_txt;
@@ -138,13 +134,13 @@ namespace Project1 {
 	private: System::Windows::Forms::Button^  dni_btn;
 	private: System::Windows::Forms::Label^  buscar_dni_lbl;
 	private: System::Windows::Forms::TextBox^  buscar_dni_txt;
-private: System::Windows::Forms::Button^  regresar_filtrarnombre_btn;
-private: System::Windows::Forms::Button^  regresar_filtrartam_btn;
-private: System::Windows::Forms::Button^  filtrarnombre_btn;
-private: System::Windows::Forms::Button^  filtrartam_btn;
-private: System::Windows::Forms::Button^  regresar_filtrarname_btn;
-private: System::Windows::Forms::Button^  regresar_filtrarsize_btn;
-private: System::Windows::Forms::Label^  hcfiltrados_lbl;
+	private: System::Windows::Forms::Button^  regresar_filtrarnombre_btn;
+	private: System::Windows::Forms::Button^  regresar_filtrartam_btn;
+	private: System::Windows::Forms::Button^  filtrarnombre_btn;
+	private: System::Windows::Forms::Button^  filtrartam_btn;
+	private: System::Windows::Forms::Button^  regresar_filtrarname_btn;
+	private: System::Windows::Forms::Button^  regresar_filtrarsize_btn;
+	private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 
 
 
@@ -155,8 +151,17 @@ private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 		/// Variable del diseñador necesaria.
 		int size;
 		HistoriasClinicas** ArregloArchivo;
+		ArbolB<HistoriasClinicas>*objArbol;
+		HashTabla* tablaAccesos;
+
+private: System::Windows::Forms::Button^  ordenar_nombre_btn;
+private: System::Windows::Forms::Button^  ordenar_tam_btn;
+
+
+
 		/// </summary>
 		System::ComponentModel::Container ^components;
+
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -226,6 +231,8 @@ private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 			this->regresar_filtrarname_btn = (gcnew System::Windows::Forms::Button());
 			this->regresar_filtrarsize_btn = (gcnew System::Windows::Forms::Button());
 			this->hcfiltrados_lbl = (gcnew System::Windows::Forms::Label());
+			this->ordenar_nombre_btn = (gcnew System::Windows::Forms::Button());
+			this->ordenar_tam_btn = (gcnew System::Windows::Forms::Button());
 			this->SuspendLayout();
 			// 
 			// hospital_lbl
@@ -364,6 +371,7 @@ private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 			this->nombre_btn->Text = L"Buscar";
 			this->nombre_btn->UseVisualStyleBackColor = true;
 			this->nombre_btn->Visible = false;
+			this->nombre_btn->Click += gcnew System::EventHandler(this, &MyForm::nombre_btn_Click);
 			// 
 			// filtrarhc_nombre_btn
 			// 
@@ -475,6 +483,7 @@ private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 			this->igual_txt->Size = System::Drawing::Size(209, 20);
 			this->igual_txt->TabIndex = 29;
 			this->igual_txt->Visible = false;
+			this->igual_txt->TextChanged += gcnew System::EventHandler(this, &MyForm::igual_txt_TextChanged_1);
 			// 
 			// menor_txt
 			// 
@@ -483,6 +492,7 @@ private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 			this->menor_txt->Size = System::Drawing::Size(209, 20);
 			this->menor_txt->TabIndex = 30;
 			this->menor_txt->Visible = false;
+			this->menor_txt->TextChanged += gcnew System::EventHandler(this, &MyForm::menor_txt_TextChanged_1);
 			// 
 			// mayor_txt
 			// 
@@ -491,6 +501,7 @@ private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 			this->mayor_txt->Size = System::Drawing::Size(209, 20);
 			this->mayor_txt->TabIndex = 31;
 			this->mayor_txt->Visible = false;
+			this->mayor_txt->TextChanged += gcnew System::EventHandler(this, &MyForm::mayor_txt_TextChanged_1);
 			// 
 			// contiene_txt
 			// 
@@ -499,6 +510,7 @@ private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 			this->contiene_txt->Size = System::Drawing::Size(209, 20);
 			this->contiene_txt->TabIndex = 32;
 			this->contiene_txt->Visible = false;
+			this->contiene_txt->TextChanged += gcnew System::EventHandler(this, &MyForm::contiene_txt_TextChanged);
 			// 
 			// finaliza_txt
 			// 
@@ -507,6 +519,7 @@ private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 			this->finaliza_txt->Size = System::Drawing::Size(209, 20);
 			this->finaliza_txt->TabIndex = 33;
 			this->finaliza_txt->Visible = false;
+			this->finaliza_txt->TextChanged += gcnew System::EventHandler(this, &MyForm::finaliza_txt_TextChanged);
 			// 
 			// empieza_txt
 			// 
@@ -515,6 +528,7 @@ private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 			this->empieza_txt->Size = System::Drawing::Size(209, 20);
 			this->empieza_txt->TabIndex = 34;
 			this->empieza_txt->Visible = false;
+			this->empieza_txt->TextChanged += gcnew System::EventHandler(this, &MyForm::empieza_txt_TextChanged);
 			// 
 			// filtrar_btn
 			// 
@@ -739,6 +753,7 @@ private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 			this->extension_btn->Text = L"Buscar";
 			this->extension_btn->UseVisualStyleBackColor = true;
 			this->extension_btn->Visible = false;
+			this->extension_btn->Click += gcnew System::EventHandler(this, &MyForm::extension_btn_Click);
 			// 
 			// tam_btn
 			// 
@@ -749,6 +764,7 @@ private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 			this->tam_btn->Text = L"Buscar";
 			this->tam_btn->UseVisualStyleBackColor = true;
 			this->tam_btn->Visible = false;
+			this->tam_btn->Click += gcnew System::EventHandler(this, &MyForm::tam_btn_Click);
 			// 
 			// fecha_btn
 			// 
@@ -759,6 +775,7 @@ private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 			this->fecha_btn->Text = L"Buscar";
 			this->fecha_btn->UseVisualStyleBackColor = true;
 			this->fecha_btn->Visible = false;
+			this->fecha_btn->Click += gcnew System::EventHandler(this, &MyForm::fecha_btn_Click);
 			// 
 			// dni_btn
 			// 
@@ -769,6 +786,7 @@ private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 			this->dni_btn->Text = L"Buscar";
 			this->dni_btn->UseVisualStyleBackColor = true;
 			this->dni_btn->Visible = false;
+			this->dni_btn->Click += gcnew System::EventHandler(this, &MyForm::dni_btn_Click);
 			// 
 			// buscar_dni_lbl
 			// 
@@ -866,6 +884,28 @@ private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 			this->hcfiltrados_lbl->Text = L"Historias clínicas con filtros aplicados:";
 			this->hcfiltrados_lbl->Visible = false;
 			// 
+			// ordenar_nombre_btn
+			// 
+			this->ordenar_nombre_btn->Location = System::Drawing::Point(497, 167);
+			this->ordenar_nombre_btn->Name = L"ordenar_nombre_btn";
+			this->ordenar_nombre_btn->Size = System::Drawing::Size(75, 23);
+			this->ordenar_nombre_btn->TabIndex = 68;
+			this->ordenar_nombre_btn->Text = L"Ordenar";
+			this->ordenar_nombre_btn->UseVisualStyleBackColor = true;
+			this->ordenar_nombre_btn->Visible = false;
+			this->ordenar_nombre_btn->Click += gcnew System::EventHandler(this, &MyForm::ordenar_nombre_btn_Click);
+			// 
+			// ordenar_tam_btn
+			// 
+			this->ordenar_tam_btn->Location = System::Drawing::Point(497, 167);
+			this->ordenar_tam_btn->Name = L"ordenar_tam_btn";
+			this->ordenar_tam_btn->Size = System::Drawing::Size(75, 23);
+			this->ordenar_tam_btn->TabIndex = 69;
+			this->ordenar_tam_btn->Text = L"Ordenar";
+			this->ordenar_tam_btn->UseVisualStyleBackColor = true;
+			this->ordenar_tam_btn->Visible = false;
+			this->ordenar_tam_btn->Click += gcnew System::EventHandler(this, &MyForm::ordenar_tam_btn_Click);
+			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -874,45 +914,26 @@ private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 			this->Controls->Add(this->hcfiltrados_lbl);
 			this->Controls->Add(this->regresar_filtrarsize_btn);
 			this->Controls->Add(this->regresar_filtrarname_btn);
-			this->Controls->Add(this->filtrartam_btn);
 			this->Controls->Add(this->filtrarnombre_btn);
 			this->Controls->Add(this->regresar_filtrartam_btn);
 			this->Controls->Add(this->regresar_filtrarnombre_btn);
-			this->Controls->Add(this->empieza_txt);
-			this->Controls->Add(this->finaliza_txt);
-			this->Controls->Add(this->contiene_txt);
 			this->Controls->Add(this->mayor_txt);
-			this->Controls->Add(this->menor_txt);
 			this->Controls->Add(this->igual_txt);
 			this->Controls->Add(this->igual_lbl);
-			this->Controls->Add(this->menor_lbl);
-			this->Controls->Add(this->mayor_lbl);
 			this->Controls->Add(this->contiene_lbl);
 			this->Controls->Add(this->finaliza_lbl);
-			this->Controls->Add(this->empieza_lbl);
-			this->Controls->Add(this->filtrarhc_tam_btn);
 			this->Controls->Add(this->filtrarhc_nombre_btn);
 			this->Controls->Add(this->filtrar_filtrarpor_lbl);
-			this->Controls->Add(this->dni_btn);
-			this->Controls->Add(this->buscar_dni_txt);
 			this->Controls->Add(this->buscar_dni_lbl);
 			this->Controls->Add(this->filtrarhc_btn);
-			this->Controls->Add(this->fecha_btn);
-			this->Controls->Add(this->buscar_fecha_txt);
-			this->Controls->Add(this->buscar_fecha_lbl);
 			this->Controls->Add(this->buscar_tamano_txt);
-			this->Controls->Add(this->tam_btn);
-			this->Controls->Add(this->extension_btn);
 			this->Controls->Add(this->regresar_dato_btn);
 			this->Controls->Add(this->colocar_lbl);
 			this->Controls->Add(this->regresar_buscarpor_btn);
 			this->Controls->Add(this->buscarhc_dni_btn);
-			this->Controls->Add(this->buscarhc_fecha_btn);
 			this->Controls->Add(this->buscarhc_tam_btn);
-			this->Controls->Add(this->buscarhc_extension_btn);
 			this->Controls->Add(this->buscarhc_nombre_btn);
 			this->Controls->Add(this->buscar_buscarpor_lbl);
-			this->Controls->Add(this->Regresar_menu_btn);
 			this->Controls->Add(this->buscarhc_btn);
 			this->Controls->Add(this->menu_lbl);
 			this->Controls->Add(this->iniciar_sesion_btn);
@@ -922,15 +943,36 @@ private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 			this->Controls->Add(this->iniciar_sesion_lbl);
 			this->Controls->Add(this->usuario_lbl);
 			this->Controls->Add(this->filtrar_btn);
-			this->Controls->Add(this->nombre_btn);
 			this->Controls->Add(this->buscar_btn);
 			this->Controls->Add(this->buscar_extension_txt);
 			this->Controls->Add(this->buscar_tamano_lbl);
 			this->Controls->Add(this->hospital_lbl);
 			this->Controls->Add(this->buscar_nombre_lbl);
-			this->Controls->Add(this->VerArchivos);
 			this->Controls->Add(this->buscar_nombre_txt);
 			this->Controls->Add(this->buscar_extension_lbl);
+			this->Controls->Add(this->buscar_dni_txt);
+			this->Controls->Add(this->buscar_fecha_lbl);
+			this->Controls->Add(this->empieza_lbl);
+			this->Controls->Add(this->mayor_lbl);
+			this->Controls->Add(this->buscar_fecha_txt);
+			this->Controls->Add(this->filtrartam_btn);
+			this->Controls->Add(this->empieza_txt);
+			this->Controls->Add(this->finaliza_txt);
+			this->Controls->Add(this->contiene_txt);
+			this->Controls->Add(this->Regresar_menu_btn);
+			this->Controls->Add(this->ordenar_nombre_btn);
+			this->Controls->Add(this->fecha_btn);
+			this->Controls->Add(this->tam_btn);
+			this->Controls->Add(this->extension_btn);
+			this->Controls->Add(this->nombre_btn);
+			this->Controls->Add(this->dni_btn);
+			this->Controls->Add(this->ordenar_tam_btn);
+			this->Controls->Add(this->buscarhc_fecha_btn);
+			this->Controls->Add(this->VerArchivos);
+			this->Controls->Add(this->filtrarhc_tam_btn);
+			this->Controls->Add(this->menor_lbl);
+			this->Controls->Add(this->menor_txt);
+			this->Controls->Add(this->buscarhc_extension_btn);
 			this->Name = L"MyForm";
 			this->Text = L".";
 			this->Load += gcnew System::EventHandler(this, &MyForm::MyForm_Load);
@@ -939,77 +981,97 @@ private: System::Windows::Forms::Label^  hcfiltrados_lbl;
 
 		}
 #pragma endregion
-
 		string ConvertirString(String^ ss)
 		{
-			return string(msclr::interop::marshal_as<std::string>(ss));
+			return msclr::interop::marshal_as<std::string>(ss);
 		}
+		int getCodigoASCII(string cadena) {
+			int acumulador;
+			for (int i = 0; i < cadena.length(); i++)
+			{
+				acumulador = acumulador + int(cadena[i]);
+			}
+			return acumulador;
+		}
+
 	private: System::Void label1_Click(System::Object^  sender, System::EventArgs^  e) {
 	}
-private: System::Void label1_Click_1(System::Object^  sender, System::EventArgs^  e) {
-}
-private: System::Void MyForm_Load(System::Object^  sender, System::EventArgs^  e) {
-}
-private: System::Void VerArchivos_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
-	
-}
-private: System::Void buscar_btn_Click(System::Object^  sender, System::EventArgs^  e) 
-{
-	ofstream EscribirRuta;
-	string LineaLectora;
-	EscribirRuta.open("RutaMadre.txt", ios::app);
-	if (EscribirRuta.is_open())
+	private: System::Void label1_Click_1(System::Object^  sender, System::EventArgs^  e) {
+	}
+	private: System::Void buscar_btn_Click(System::Object^  sender, System::EventArgs^  e)
 	{
-		ifstream leerRuta;
-		string texto;
-		leerRuta.open("RutaMadre.txt", ios::in);
-		while (!leerRuta.eof())
+		ofstream EscribirRuta;
+		string LineaLectora;
+		EscribirRuta.open("RutaMadre.txt", ios::app);
+		if (EscribirRuta.is_open())
 		{
-			getline(leerRuta, texto);
-			cout << texto << endl;
-		}
-		if (texto != "")
-		{
-			String^ str2 = gcnew String(texto.c_str());
-			VerArchivos->Items->Clear();
-			cli::array<String^>^  files = Directory::GetFiles(str2);
-
-			for each(String^ file in files)
+			ifstream leerRuta;
+			string texto;
+			leerRuta.open("RutaMadre.txt", ios::in);
+			while (!leerRuta.eof())
 			{
-				VerArchivos->Items->Add(file);
-				FileInfo^ archivo = gcnew FileInfo(file);
-				size++;
-				ArregloArchivo[size - 1] = new HistoriasClinicas(ConvertirString(archivo->Name), archivo->Length, ConvertirString(archivo->Extension),
-					ConvertirString(Convert::ToString(archivo->CreationTime)), ConvertirString(file));
+				getline(leerRuta, texto);
+				cout << texto << endl;
 			}
-		}
-		else
-		{
-			if (folderBrowserDialog1->ShowDialog() == System::Windows::Forms::DialogResult::OK)
+			if (texto != "")
 			{
-				EscribirRuta << ConvertirString(folderBrowserDialog1->SelectedPath);  //guarda la ruta por primera vez 
+				String^ str2 = gcnew String(texto.c_str());
 				VerArchivos->Items->Clear();
-				cli::array<String^>^  files = Directory::GetFiles(folderBrowserDialog1->SelectedPath);
+				cli::array<String^>^  files = Directory::GetFiles(str2);
 
 				for each(String^ file in files)
 				{
-					VerArchivos->Items->Add(file);
+					
+					string textoDNI;
 					FileInfo^ archivo = gcnew FileInfo(file);
+					StreamReader^ dni = archivo->OpenText();
+					String^ s = dni->ReadLine();
+					
 					size++;
 					ArregloArchivo[size - 1] = new HistoriasClinicas(ConvertirString(archivo->Name), archivo->Length, ConvertirString(archivo->Extension),
-						ConvertirString(Convert::ToString(archivo->CreationTime)), ConvertirString(file));
+						ConvertirString(Convert::ToString(archivo->CreationTime)), ConvertirString(file), ConvertirString(s));
+					String^ mostrarArchivo = gcnew String(ArregloArchivo[size - 1]->mostrarArchivoCompleto().c_str());
+					VerArchivos->Items->Add(mostrarArchivo);
+				}
+
+			}
+			else
+			{
+				if (folderBrowserDialog1->ShowDialog() == System::Windows::Forms::DialogResult::OK)
+				{
+					EscribirRuta << ConvertirString(folderBrowserDialog1->SelectedPath);  //guarda la ruta por primera vez 
+					VerArchivos->Items->Clear();
+					cli::array<String^>^  files = Directory::GetFiles(folderBrowserDialog1->SelectedPath);
+
+					for each(String^ file in files)
+					{
+						string textoDNI;
+						FileInfo^ archivo = gcnew FileInfo(file);
+						StreamReader^ dni = archivo->OpenText();
+						String^ s = dni->ReadLine();
+
+						size++;
+						ArregloArchivo[size - 1] = new HistoriasClinicas(ConvertirString(archivo->Name), archivo->Length, ConvertirString(archivo->Extension),
+							ConvertirString(Convert::ToString(archivo->CreationTime)), ConvertirString(file), ConvertirString(s));
+						String^ mostrarArchivo = gcnew String(ArregloArchivo[size - 1]->mostrarArchivoCompleto().c_str());
+						VerArchivos->Items->Add(mostrarArchivo);
+					
+
+					}
 				}
 			}
+			for (int i = 0; i < size; i++) {
+				objArbol->insertar_tam(ArregloArchivo[i]);
+			}
+			//objArbol->enOrden_tam();
+
+			buscar_btn->Visible = false;
+			menu_lbl->Visible = true;
+			buscarhc_btn->Visible = true;
+			filtrarhc_btn->Visible = true;
+			Regresar_menu_btn->Visible = false;
 		}
 	}
-
-
-	buscar_btn->Visible = false;
-	menu_lbl->Visible = true;
-	buscarhc_btn->Visible = true;
-	filtrarhc_btn->Visible = true;
-	Regresar_menu_btn->Visible = true;
-}
 private: System::Void iniciar_sesion_btn_Click(System::Object^  sender, System::EventArgs^  e) {
 	buscar_btn->Visible = true;
 	iniciar_sesion_lbl->Visible = false;
@@ -1019,8 +1081,28 @@ private: System::Void iniciar_sesion_btn_Click(System::Object^  sender, System::
 	usuario_txt->Visible = false;
 	contraseña_txt->Visible = false;
 	iniciar_sesion_btn->Visible = false;
+
+	string id = ConvertirString(usuario_txt->Text);
+	string password = ConvertirString(contraseña_txt->Text);
+	if (id == tablaAccesos->buscarParaIngresar(getCodigoASCII(password)))
+	{
+		buscar_btn->Visible = true;
+		iniciar_sesion_lbl->Visible = false;
+		iniciar_sesion_btn->Visible = false;
+		usuario_lbl->Visible = false;
+		contraseña_lbl->Visible = false;
+		usuario_txt->Visible = false;
+		contraseña_txt->Visible = false;
+		iniciar_sesion_btn->Visible = false;
+	}
+	else
+	{
+		//MessageBox::Show("Ingrese un usuario valido");
+	}
 }
 private: System::Void textBox1_TextChanged(System::Object^  sender, System::EventArgs^  e) {
+	//contraseña_txt->Text = "";
+	contraseña_txt->PasswordChar = '*';
 }
 private: System::Void Regresar_menu_btn_Click(System::Object^  sender, System::EventArgs^  e) {
 	buscar_btn->Visible = true;
@@ -1035,8 +1117,6 @@ private: System::Void buscarhc_btn_Click(System::Object^  sender, System::EventA
 	filtrarhc_btn->Visible = false;
 	Regresar_menu_btn->Visible = false;
 
-
-
 	buscar_buscarpor_lbl->Visible = true;
 	buscarhc_nombre_btn	->Visible = true;
 	buscarhc_extension_btn->Visible = true;
@@ -1045,12 +1125,14 @@ private: System::Void buscarhc_btn_Click(System::Object^  sender, System::EventA
 	buscarhc_dni_btn->Visible = true;
 	regresar_buscarpor_btn->Visible = true;
 
+	
+
 }
 private: System::Void regresar_buscarpor_btn_Click(System::Object^  sender, System::EventArgs^  e) {
 	menu_lbl->Visible = true;
 	buscarhc_btn->Visible = true;
 	filtrarhc_btn->Visible = true;
-	Regresar_menu_btn->Visible = true;
+	Regresar_menu_btn->Visible = false;
 	//buscar
 	buscar_buscarpor_lbl->Visible = false;
 	buscarhc_nombre_btn->Visible = false;
@@ -1066,7 +1148,6 @@ private: System::Void regresar_buscarpor_btn_Click(System::Object^  sender, Syst
 	regresar_buscarpor_btn->Visible = false;
 }
 private: System::Void buscarhc_nombre_btn_Click(System::Object^  sender, System::EventArgs^  e) {
-
 	colocar_lbl->Visible = true;
 	buscar_nombre_lbl->Visible = true;
 	buscar_nombre_txt->Visible = true;
@@ -1081,6 +1162,9 @@ private: System::Void buscarhc_nombre_btn_Click(System::Object^  sender, System:
 	buscarhc_fecha_btn->Visible = false;
 	buscarhc_dni_btn->Visible = false;
 	regresar_buscarpor_btn->Visible = false;
+
+	
+
 }
 private: System::Void regresar_dato_btn_Click(System::Object^  sender, System::EventArgs^  e) {
 	//nombre
@@ -1132,9 +1216,9 @@ private: System::Void buscarhc_extension_btn_Click(System::Object^  sender, Syst
 	buscarhc_fecha_btn->Visible = false;
 	buscarhc_dni_btn->Visible = false;
 	regresar_buscarpor_btn->Visible = false;
-
 }
 private: System::Void buscarhc_tam_btn_Click(System::Object^  sender, System::EventArgs^  e) {
+
 	colocar_lbl->Visible = true;
 	buscar_tamano_lbl->Visible = true;
 	buscar_tamano_txt->Visible = true;
@@ -1165,6 +1249,7 @@ private: System::Void buscarhc_fecha_btn_Click(System::Object^  sender, System::
 	buscarhc_fecha_btn->Visible = false;
 	buscarhc_dni_btn->Visible = false;
 	regresar_buscarpor_btn->Visible = false;
+
 }
 private: System::Void buscarhc_dni_btn_Click(System::Object^  sender, System::EventArgs^  e) {
 	colocar_lbl->Visible = true;
@@ -1181,6 +1266,7 @@ private: System::Void buscarhc_dni_btn_Click(System::Object^  sender, System::Ev
 	buscarhc_fecha_btn->Visible = false;
 	buscarhc_dni_btn->Visible = false;
 	regresar_buscarpor_btn->Visible = false;
+
 }
 private: System::Void filtrarhc_btn_Click(System::Object^  sender, System::EventArgs^  e) {
 	menu_lbl->Visible = false;
@@ -1215,6 +1301,7 @@ private: System::Void filtrarhc_nombre_btn_Click(System::Object^  sender, System
 	regresar_filtrarnombre_btn->Visible = true;
 
 	filtrarnombre_btn->Visible = true;
+
 
 }
 private: System::Void regresar_filtrarnombre_btn_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -1267,6 +1354,7 @@ private: System::Void regresar_filtrartam_btn_Click(System::Object^  sender, Sys
 
 }
 private: System::Void filtrarnombre_btn_Click(System::Object^  sender, System::EventArgs^  e) {
+	
 	VerArchivos->Visible = true;
 	regresar_filtrarname_btn->Visible = true;
 	hcfiltrados_lbl->Visible = true;
@@ -1278,8 +1366,60 @@ private: System::Void filtrarnombre_btn_Click(System::Object^  sender, System::E
 	contiene_lbl->Visible = false;
 	contiene_txt->Visible = false;
 	regresar_filtrarnombre_btn->Visible = false;
-
+	
 	filtrarnombre_btn->Visible = false;
+	
+	//ordenar_nombre_btn->Visible = true;
+
+	VerArchivos->Items->Clear();
+
+	//empieza
+	if (empieza_txt->Text != "") {
+		for (int i = 0; i < size; i++) {
+			string n = ArregloArchivo[i]->getNombre();
+			string n1 = n.substr(0, 1);
+			if (n1 == ConvertirString(empieza_txt->Text)) {
+				VerArchivos->Items->Add(gcnew String(ArregloArchivo[i]->getDireccion().c_str()));
+			}
+		}
+	}
+
+	//finaliza
+	if (finaliza_txt->Text != "") {
+		for (int i = 0; i < size; i++) {
+			string n = ArregloArchivo[i]->getNombre();
+			int n1 = n.length() - 5; 
+			string n2 = n.substr(n1, 1);
+			if (n2 == ConvertirString(finaliza_txt->Text)) {
+				VerArchivos->Items->Add(gcnew String(ArregloArchivo[i]->getDireccion().c_str()));
+			}
+		}
+	}
+
+	//contiene
+	if (contiene_txt->Text != "") 
+	{
+		for (int i = 0; i < size; i++) 
+		{
+			string tmp;
+			string tmp2;
+			string n = ArregloArchivo[i]->getNombre();
+			for (int j = 0; j <n.length()-4; j++) 
+			{
+				int n1 = n.length() - j - 5;
+				string n2 = n.substr(n1, 1);
+				cout << n2 << i<<endl;//ana
+
+				if (n2 == ConvertirString(contiene_txt->Text)) 
+				{
+
+					VerArchivos->Items->Add(gcnew String(ArregloArchivo[i]->getDireccion().c_str()));
+					break;
+				}
+				
+			}
+		}
+	}
 }
 private: System::Void filtrartam_btn_Click(System::Object^  sender, System::EventArgs^  e) {
 	VerArchivos->Visible = true;
@@ -1294,6 +1434,38 @@ private: System::Void filtrartam_btn_Click(System::Object^  sender, System::Even
 	igual_txt->Visible = false;
 	regresar_filtrartam_btn->Visible = false;
 	filtrartam_btn->Visible = false;
+	VerArchivos->Items->Clear();
+
+	ordenar_tam_btn->Visible = true;
+
+	VerArchivos->Items->Clear();
+	if (mayor_txt->Text != "") {
+		objArbol->buscar_mayor(Convert::ToInt32(mayor_txt->Text));
+		for (int i = 0; i < objArbol->_getvectorstring()->size(); i++)
+		{
+			VerArchivos->Items->Add(gcnew String(objArbol->_getvectorstring()->at(i).c_str()));
+		}
+		objArbol->_limpiarvector();
+	}
+
+	
+	if (menor_txt->Text != "") {
+		objArbol->buscar_menor(Convert::ToInt32(menor_txt->Text));
+		for (int i = 0; i < objArbol->_getvectorstring()->size(); i++)
+		{
+			VerArchivos->Items->Add(gcnew String(objArbol->_getvectorstring()->at(i).c_str()));
+		}
+		objArbol->_limpiarvector();
+	}
+
+	if (igual_txt->Text != "") {
+		objArbol->buscar_por_tam(Convert::ToInt32(igual_txt->Text));
+		for (int i = 0; i < objArbol->_getvectorstring()->size(); i++)
+		{
+			VerArchivos->Items->Add(gcnew String(objArbol->_getvectorstring()->at(i).c_str()));
+		}
+		objArbol->_limpiarvector();
+	}
 }
 private: System::Void regresar_filtrarname_btn_Click(System::Object^  sender, System::EventArgs^  e) {
 	VerArchivos->Visible = false;
@@ -1309,6 +1481,8 @@ private: System::Void regresar_filtrarname_btn_Click(System::Object^  sender, Sy
 	regresar_filtrarnombre_btn->Visible = true;
 
 	filtrarnombre_btn->Visible = true;
+	ordenar_nombre_btn->Visible = false;
+
 }
 private: System::Void regresar_filtrarsize_btn_Click(System::Object^  sender, System::EventArgs^  e) {
 	VerArchivos->Visible = false;
@@ -1324,7 +1498,204 @@ private: System::Void regresar_filtrarsize_btn_Click(System::Object^  sender, Sy
 	regresar_filtrartam_btn->Visible = true;
 
 	filtrartam_btn->Visible = true;
+	ordenar_tam_btn->Visible = false;
 
+
+}
+private: System::Void tam_btn_Click(System::Object^  sender, System::EventArgs^  e) {
+	int t = System::Convert::ToInt32(buscar_tamano_txt->Text);
+	VerArchivos->Items->Clear();
+	
+	objArbol->buscar_por_tam(t);
+	for (int i = 0; i < objArbol->_getvectorstring()->size(); i++)
+	{
+		VerArchivos->Items->Add(gcnew String(objArbol->_getvectorstring()->at(i).c_str()));
+	}
+	objArbol->_limpiarvector();
+	
+}
+
+private: System::Void nombre_btn_Click(System::Object^  sender, System::EventArgs^  e) {
+
+	VerArchivos->Items->Clear();
+	
+	objArbol->buscar_por_nombre(ConvertirString(buscar_nombre_txt->Text) + ".txt");
+	for (int i = 0; i < objArbol->_getvectorstring()->size(); i++)
+	{
+		VerArchivos->Items->Add(gcnew String(objArbol->_getvectorstring()->at(i).c_str()));
+	}
+	objArbol->_limpiarvector();
+}
+private: System::Void fecha_btn_Click(System::Object^  sender, System::EventArgs^  e) {
+	
+	VerArchivos->Items->Clear();
+
+	objArbol->buscar_por_fecha(ConvertirString(buscar_fecha_txt->Text));
+	for (int i = 0; i < objArbol->_getvectorstring()->size(); i++)
+	{
+		VerArchivos->Items->Add(gcnew String(objArbol->_getvectorstring()->at(i).c_str()));
+	}
+	objArbol->_limpiarvector();
+}
+private: System::Void extension_btn_Click(System::Object^  sender, System::EventArgs^  e) {
+
+	VerArchivos->Items->Clear();
+
+	objArbol->buscar_por_extension(ConvertirString(buscar_extension_txt->Text));
+	for (int i = 0; i < objArbol->_getvectorstring()->size(); i++)
+	{
+		VerArchivos->Items->Add(gcnew String(objArbol->_getvectorstring()->at(i).c_str()));
+	}
+	objArbol->_limpiarvector();
+}
+private: System::Void dni_btn_Click(System::Object^  sender, System::EventArgs^  e) {
+
+	VerArchivos->Items->Clear();
+
+	objArbol->buscar_por_dni(ConvertirString(buscar_dni_txt->Text));
+	for (int i = 0; i < objArbol->_getvectorstring()->size(); i++)
+	{
+		VerArchivos->Items->Add(gcnew String(objArbol->_getvectorstring()->at(i).c_str()));
+	}
+	objArbol->_limpiarvector();
+
+}
+private: System::Void empieza_txt_TextChanged(System::Object^  sender, System::EventArgs^  e) {
+	if (empieza_txt->Text != "") {
+		contiene_txt->Enabled = false;
+		finaliza_txt->Enabled = false;
+	}
+	else {
+		contiene_txt->Enabled = true;
+		finaliza_txt->Enabled = true;
+	}
+}
+private: System::Void finaliza_txt_TextChanged(System::Object^  sender, System::EventArgs^  e) {
+	if (finaliza_txt->Text != "") {
+		contiene_txt->Enabled = false;
+		empieza_txt->Enabled = false;
+	}
+	else {
+		contiene_txt->Enabled = true;
+		empieza_txt->Enabled = true;
+	}
+}
+private: System::Void contiene_txt_TextChanged(System::Object^  sender, System::EventArgs^  e) {
+	if (contiene_txt->Text != "") {
+		finaliza_txt->Enabled = false;
+		empieza_txt->Enabled = false;
+	}
+	else {
+		finaliza_txt->Enabled = true;
+		empieza_txt->Enabled = true;
+	}
+}
+private: System::Void mayor_txt_TextChanged_1(System::Object^  sender, System::EventArgs^  e) {
+	if (mayor_txt->Text != "") {
+		menor_txt->Enabled = false;
+		igual_txt->Enabled = false;
+	}
+	else {
+		menor_txt->Enabled = true;
+		igual_txt->Enabled = true;
+	}
+}
+private: System::Void menor_txt_TextChanged_1(System::Object^  sender, System::EventArgs^  e) {
+	if (menor_txt->Text != "") {
+		mayor_txt->Enabled = false;
+		igual_txt->Enabled = false;
+	}
+	else {
+		mayor_txt->Enabled = true;
+		igual_txt->Enabled = true;
+	}
+}
+private: System::Void igual_txt_TextChanged_1(System::Object^  sender, System::EventArgs^  e) {
+	if (igual_txt->Text != "") {
+		mayor_txt->Enabled = false;
+		menor_txt->Enabled = false;
+	}
+	else {
+		mayor_txt->Enabled = true;
+		menor_txt->Enabled = true;
+	}
+}
+private: System::Void ordenar_nombre_btn_Click(System::Object^  sender, System::EventArgs^  e) {
+
+}
+private: System::Void ordenar_tam_btn_Click(System::Object^  sender, System::EventArgs^  e) {
+	int contador;
+	contador++;
+	VerArchivos->Items->Clear();
+	if (contador % 2 != 0) {
+		if (mayor_txt->Text != "") {
+			objArbol->descendente_tam_mayor(Convert::ToInt32(mayor_txt->Text));
+			for (int i = 0; i < objArbol->_getvectorstring()->size(); i++)
+			{
+				VerArchivos->Items->Add(gcnew String(objArbol->_getvectorstring()->at(i).c_str()));
+			}
+			objArbol->_limpiarvector();
+		}
+		if (menor_txt->Text != "") {
+			objArbol->descendente_tam_menor(Convert::ToInt32(menor_txt->Text));
+			for (int i = 0; i < objArbol->_getvectorstring()->size(); i++)
+			{
+				VerArchivos->Items->Add(gcnew String(objArbol->_getvectorstring()->at(i).c_str()));
+			}
+			objArbol->_limpiarvector();
+		}
+		if (igual_txt->Text != "") {
+			objArbol->buscar_por_tam(Convert::ToInt32(igual_txt->Text));
+			for (int i = 0; i < objArbol->_getvectorstring()->size(); i++)
+			{
+				VerArchivos->Items->Add(gcnew String(objArbol->_getvectorstring()->at(i).c_str()));
+			}
+			objArbol->_limpiarvector();
+		}
+	}
+
+	else {
+		if (mayor_txt->Text != "") {
+			objArbol->ascendente_tam_mayor(Convert::ToInt32(mayor_txt->Text));
+			for (int i = 0; i < objArbol->_getvectorstring()->size(); i++)
+			{
+				VerArchivos->Items->Add(gcnew String(objArbol->_getvectorstring()->at(i).c_str()));
+			}
+			objArbol->_limpiarvector();
+		}
+
+
+		if (menor_txt->Text != "") {
+			objArbol->ascendente_tam_menor(Convert::ToInt32(menor_txt->Text));
+			for (int i = 0; i < objArbol->_getvectorstring()->size(); i++)
+			{
+				VerArchivos->Items->Add(gcnew String(objArbol->_getvectorstring()->at(i).c_str()));
+			}
+			objArbol->_limpiarvector();
+		}
+
+		if (igual_txt->Text != "") {
+			objArbol->buscar_por_tam(Convert::ToInt32(igual_txt->Text));
+			for (int i = 0; i < objArbol->_getvectorstring()->size(); i++)
+			{
+				VerArchivos->Items->Add(gcnew String(objArbol->_getvectorstring()->at(i).c_str()));
+			}
+			objArbol->_limpiarvector();
+		}
+	}
+
+	//contador = 0;
+
+}
+private: System::Void VerArchivos_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
+}
+private: System::Void MyForm_Load(System::Object^  sender, System::EventArgs^  e) 
+{
+	tablaAccesos->InsertarHash(getCodigoASCII("admin"), "admin");
+	tablaAccesos->InsertarHash(getCodigoASCII("lucero"), "lucero");
+	tablaAccesos->InsertarHash(getCodigoASCII("miguel"), "miguel");
+	tablaAccesos->InsertarHash(getCodigoASCII("usuario"), "usuario");
 }
 };
 }
+
